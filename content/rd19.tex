@@ -29,7 +29,9 @@
 
 \newcommand{\g}{\,\vert\,} % for conditional probability, division
 
-\subsection {A fully connected FFNN} \label {sec: fcffnn}
+\newcommand{\set}[1]{\{{#1}\}}
+
+\section {A fully connected FFNN} \label {sec: fcffnn}
 Forward propagation
 \begin {equation} \begin {split}
 & \text {Initialize the input layer } \vZ^1 = \vX, \vA^1 = \vZ^1 \\
@@ -65,9 +67,9 @@ Where layer $l$ has $J$ nodes and layer $l-1$ has $K$ nodes.
 
 Backward propagation
 \begin {equation} \begin {split}
-& \text {Assuming that the loss function is } \cL = 0.5 (\vY - \vA^l)^2 \\
+& \text {Assuming that the loss function is } \cL = 0.5 (\vY - \vA^L)^2 \\
 & \qquad \text {Where $\vY$ is the known output corresponding to the input $\vX$} \\
-& \qquad \text {Calculate the final error } \nabla_a \cL =  \vA^l - \vY \\
+& \qquad \text {Calculate the final error } \nabla_a \cL =  \vA^L - \vY \\
 & \text {Initialize  the back propagation } \vdelta^L =  \ewise {\nabla_a \cL} {{f^L}^{'} (\vZ^L)} \\
 & \text {Backpropagate the error } \vdelta^l =  \ewise {\left[ {\mW^{l+1}}^T \vdelta^{l+1} \right]} {{f^{l}}^{'} (\vZ^l)}, l \in [2, L-1] \\
 & \text {Calculate the gradient of weights } \frac {\partial \cL} {\partial \mW^l} = \vdelta^l {\vA^{l-1}}^T, l \in [2, L] \\
@@ -82,7 +84,43 @@ Update ($\eta$ is a hyperparameter that is not learned by the FFNN)
 & \text {Update bias weights } \vB^l = \vB^l - \eta \frac {\partial \cL} {\partial \vB^l}, l \in [2, L] \\
 \end {split} \end {equation}
 
-\subsection {ATE abd Selection Bias} 
+\section {14.310}
+\subsection {Diff-in-Diff analysis}
+The Diff-in-Diff approach is used to estimate the effect of a treatment using natural experiments. Often it is not possible to treat subjects. However a natural experiment may treat a collection of subjects some of whom are in the control group and some in the treatment g
+roup. Membership in the control and treatment group is independent of the event and depends on other natually occurring factors.
+
+Definitions:
+\begin {enumerate}
+\item $Y_{i, e}$ is the response observation for the ith sample, before ($e = 0$) or after the event ($e = 1$)
+\item $T_i$ are categorical variables and $T_i \in \set{0, 1}$. $T_i = 1$ when subject is in the treatment group.  $T_i = 0$ when subject is in the control group
+\item $E_e = 1$ for the observations that are after an event has happened and $0$ otherwise. The event applies to both the treatment and control groups and is the equivalent of applying the treatment to both the treatment and control groups
+\end {enumerate}
+
+Ordinary Least Squares (OLS) equation:
+\begin {equation} \begin {split} 
+& Y_{i, e} = \beta_0 + \beta_1 T_i + \beta_2 E_e + \beta_3 T_i E_e + \epsilon_{i, e} \\
+& \text {Where $\epsilon_{i, e}$ is the unexplained noise} \\
+\end {split} \end {equation}
+
+Interpretation:
+\begin {enumerate}
+\item $\beta_0$: the average value of $Y_{i, e}$ when $T_i = 0, E_e = 0$
+\item $\beta_1$: the average increase in $Y_{i, e}$ from $T_i = 0, E_e = 0$ to $T_i = 1, E_e = 0$
+\item $\beta_2$: the average increase in $Y_{i, e}$ from $T_i = 0, E_e = 0$ to $T_i = 0, E_e = 1$
+\item $\beta_3$: the average causal effect on $Y$ of being treated. This is the diff-in-diff estimate
+\item The difference in average outcome in the treatment group before and after treatment is $(\beta_0 + \beta_1 + \beta_2 + \beta_3) - (\beta_0 + \beta_1) = \beta_3 + \beta_2$
+\item The difference in average outcome in the control group before and after treatment is $(\beta_0 + \beta_2) - (\beta_0) = \beta_2$
+\item Thus, the difference in differences is $(\beta_3 + \beta_2) - (\beta_2) = \beta_3$
+\item The diff-in-diff estimate is obtained by removing the effect of the event represented by $E$ on the control group from the effect of the event represented by $E$ on the treatment group
+\end {enumerate}
+
+Remarks:
+\begin {enumerate}
+\item The Diff-in-Diff relies on a "parallel trends" assumption
+\item The parallel trends is stated as "in the absence of treatment, the difference between the ‘treatment’ and ‘control’ group is constant over time."
+\end {enumerate}
+
+\subsection {ATE and Selection Bias} 
 When we observe a group of subjects, some of whom have been treated and some not, we calculate
 \begin {equation} \begin {split}
 & \EE(Y_i(1) \g  W_i = 1) - \EE(Y_i(0) \g  W_i = 0) \iff \\
@@ -90,6 +128,30 @@ When we observe a group of subjects, some of whom have been treated and some not
 & \qquad \EE(Y_i(0) \g  W_i = 1) -  \EE(Y_i(0) \g  W_i = 0) ] \iff  \\
 & \text {Average Treatment Effect} + \text { Selection Bias} \\
 \end {split} \end {equation}
+
+\subsection {Sample size}
+The sample size required to achieve a certain power is given by:
+\begin {equation} \begin {split}
+& N = \frac {\left(\Phi^{-1} (1 - \beta) + \Phi^{-1} (1 - \alpha/2) \right)^2} {\frac {\tau^2} {\sigma^2} \gamma (1 - \gamma)} \\
+& \beta \equiv \text { probability of type II error} \\
+& 1 - \beta \equiv \text { power} \\ 
+& \alpha \equiv \text { significance level desired for a two-sided test} \\
+& \gamma \equiv \text { fraction of sample in treatment group} \\
+& \tau \equiv \text { ATE} \\
+\end {split} \end {equation}
+
+$N$ may have to be rounded up (if it is fraction) in order to obtain a conservative estimate of sample size.
+
+\subsection {F Stat}
+\begin {enumerate}
+\item $SSRu := $ Sum of squared residuals of unrestricted model
+\item $SSRr := $ Sum of squared residuals of restricted model
+\item $r := $ number of restrictions
+\item $k := $ number of covariates
+\item $n := $ number of samples
+\item $F_{stat} := \frac {\frac {SSRr - SSRu} {r}} {\frac {SSRu} {n - (k+1)}}$. When $F_{stat}$ is large, the null hypothesis can be rejected
+\item $F_{stat} \sim F(r, n-(k+1))$ where $F(df1, df2)$ is the F-distribution with $(df1, df2)$ degrees of freedom
+\end {enumerate}
 
 \subsection {Fixed effects model} \label {r: fem}
 G(factor(admin)) creates a dummy variable, one per region, and includes the dummy variable
