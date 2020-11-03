@@ -91,7 +91,7 @@ Update ($\eta$ is a hyperparameter that is not learned by the FFNN)
 
 \section {Tips for solving perceptron problems}
 \begin {enumerate}
-\item Commit to memory that when hinge loss ($L_h(z)$) $> 0$, then the gradient of the hinge loss is $-z$
+\item Commit to memory that when hinge loss ($L_h(z)$) $> 0$, then the gradient of the hinge loss wrt $z$ is $-1$
   \begin {enumerate}
   \item When hinge loss for a data point $\vx_i, y_i$ and hyperplane $\vtheta^T \vx_i + \thetac = 0$ is given to be $> 0$, 
   \item Then $\max(0, 1 - y_i(\vtheta^T \vx_i + \theta)) > 0 \implies L_h = 1 - y_i(\vtheta^T \vx_i + \theta)$
