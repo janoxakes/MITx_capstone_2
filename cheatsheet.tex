@@ -13,12 +13,20 @@
 \usepackage[t1]{sourcesanspro}
 \usepackage{multicol}
 \usepackage{wrapfig}
-\usepackage[top=0mm,bottom=1mm,left=0mm,right=1mm]{geometry}
+\usepackage[top=1mm,bottom=1mm,left=1mm,right=1mm]{geometry}
 \usepackage[framemethod=tikz]{mdframed}
 \usepackage{microtype}
 \usepackage{pdfpages}
 \usepackage{bbm}
 \usepackage{enumerate} 
+
+% RD19
+\usepackage{dsfont}
+\usepackage{bm}
+% \usepackage{amsmath, amsthm, amssymb, amsfonts}
+
+% for code snippets
+\usepackage{listings}
 
 \let\bar\overline
 
@@ -31,7 +39,7 @@
 \begin{document}
 %\footnotesize
 \small
-\begin{multicols*}{6}
+\begin{multicols*}{3}
 
 % multicol parameters
 % These lengths are set only within the two main columns
@@ -58,6 +66,8 @@
 \input{content/clustering}
 \input{content/generative_models}
 \input{content/reinforcement}
+\input{content/rd19}
+
 %
 %
 %
